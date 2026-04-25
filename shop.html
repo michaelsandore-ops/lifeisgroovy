@@ -360,6 +360,20 @@ footer {
 }
 .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
+/* ── SNIPCART BRAND OVERRIDES ── */
+:root {
+  --color-default: #F5C518;
+  --color-alt: #0A0A0A;
+  --color-badge-active-background: #F5C518;
+  --color-badge-active-foreground: #0A0A0A;
+  --color-input-focus: #F5C518;
+  --color-buttonPrimary: #F5C518;
+  --color-buttonPrimary-hover: #FFD93D;
+  --color-buttonPrimary-active: #C9A000;
+  --color-buttonPrimary-foreground: #0A0A0A;
+  --color-cartHeader: #141414;
+  --color-modal-overlay: rgba(0,0,0,0.85);
+}
 /* ── CRISIS BAR ── */
 .crisis-bar {
   background:linear-gradient(90deg,#b91c1c,#991b1b);
@@ -369,6 +383,8 @@ footer {
 }
 .crisis-bar a { color:#fde68a; text-decoration:none; }
 </style>
+<!-- Snipcart -->
+<link rel="stylesheet" href="https://cdn.snipcart.com/themes/v3.3.3/default/snipcart.css" />
 </head>
 <body>
 
@@ -390,6 +406,22 @@ footer {
     <li><a href="index.html#community">Community</a></li>
     <li><a href="index.html#mission">Our Mission</a></li>
   </ul>
+  <button class="snipcart-checkout" style="
+    background:transparent; border:none; cursor:pointer;
+    position:relative; padding:0.4rem 0.6rem;
+    display:flex; align-items:center; gap:0.4rem;
+    color:var(--white-dim); font-family:'Nunito',sans-serif;
+    font-size:0.85rem; font-weight:700; transition:color 0.2s;
+  " onmouseover="this.style.color='#F5C518'" onmouseout="this.style.color=''">
+    🛒 Cart
+    <span id="cart-badge" style="
+      display:none; background:var(--gold); color:var(--black);
+      border-radius:50%; width:18px; height:18px;
+      font-size:0.7rem; font-weight:800;
+      align-items:center; justify-content:center;
+      position:absolute; top:-4px; right:-4px;
+    ">0</span>
+  </button>
 </nav>
 
 <!-- HERO -->
@@ -506,7 +538,25 @@ footer {
       </div>
 
       <div class="cta-row">
-        <button class="btn-cart" onclick="addCart('Tactical Service Dog Vest')">Add to Cart</button>
+        <button
+          class="btn-cart snipcart-add-item"
+          data-item-id="tactical-vest"
+          data-item-name="Tactical Service Dog Vest"
+          data-item-price="120.00"
+          data-item-url="/shop.html"
+          data-item-description="1000D Nylon Tactical Service Dog Vest — Adjustable 4-Point Fit, MOLLE Compatible, Dual D-Rings, Top Handle Control"
+          data-item-image=""
+          data-item-custom1-name="Size"
+          data-item-custom1-options="S|M[+0.00]|L[+0.00]"
+          data-item-custom1-required="true"
+          data-item-custom2-name="Color"
+          data-item-custom2-options="Black|Army|Sand"
+          data-item-custom2-required="true"
+          data-item-stackable="never"
+          id="vest-cart-btn"
+          onclick="updateVestCartData(this)">
+          Add to Cart
+        </button>
         <button class="btn-enquire" onclick="enquire('Tactical Service Dog Vest')">Enquire</button>
       </div>
     </div>
@@ -623,7 +673,25 @@ footer {
       </div>
 
       <div class="cta-row">
-        <button class="btn-cart" onclick="addCart('Tactical Dog Collar')">Add to Cart</button>
+        <button
+          class="btn-cart snipcart-add-item"
+          data-item-id="tactical-collar"
+          data-item-name="Tactical Dog Collar"
+          data-item-price="50.00"
+          data-item-url="/shop.html"
+          data-item-description="Nylon Tactical Dog Collar — Metal Quick-Release Buckle, Reflective, Adjustable, Matte Black Hardware"
+          data-item-image=""
+          data-item-custom1-name="Size"
+          data-item-custom1-options="S|M[+0.00]|L[+0.00]"
+          data-item-custom1-required="true"
+          data-item-custom2-name="Color"
+          data-item-custom2-options="Black|Camo"
+          data-item-custom2-required="true"
+          data-item-stackable="never"
+          id="collar-cart-btn"
+          onclick="updateCollarCartData(this)">
+          Add to Cart
+        </button>
         <button class="btn-enquire" onclick="enquire('Tactical Dog Collar')">Enquire</button>
       </div>
     </div>
@@ -768,11 +836,86 @@ function pickSize(el, groupId) {
 }
 
 // ── Cart / Enquire ──
-function addCart(name) {
-  showToast('✓ ' + name + ' added to cart');
+// ── Snipcart helpers ──
+
+function updateVestCartData(btn) {
+  // Read active size
+  const sizeBtn = document.querySelector('#vest-sizes .size-btn.active');
+  const colorTab = document.querySelector('#vest-color-tabs .color-tab.active');
+  const size = sizeBtn ? sizeBtn.textContent.trim() : 'M';
+  const color = colorTab ? colorTab.textContent.trim() : 'Black';
+  // Set custom field defaults to active selection
+  btn.setAttribute('data-item-custom1-value', size);
+  btn.setAttribute('data-item-custom2-value', color);
+  // Set image to current main photo
+  const mainImg = document.querySelector('#vest-main img.visible');
+  if (mainImg) btn.setAttribute('data-item-image', mainImg.src.substring(0, 200));
 }
+
+function updateCollarCartData(btn) {
+  const sizeBtn = document.querySelector('#collar-sizes .size-btn.active');
+  const colorTab = document.querySelector('#collar-color-tabs .color-tab.active');
+  const size = sizeBtn ? sizeBtn.textContent.trim() : 'M';
+  const color = colorTab ? colorTab.textContent.trim() : 'Black';
+  btn.setAttribute('data-item-custom1-value', size);
+  btn.setAttribute('data-item-custom2-value', color);
+  const mainImg = document.querySelector('#collar-main img.visible');
+  if (mainImg) btn.setAttribute('data-item-image', mainImg.src.substring(0, 200));
+}
+
+// Cart item count badge
+document.addEventListener('snipcart.ready', function() {
+
+  // Cart badge + toast on item added
+  Snipcart.events.on('item.added', function(item) {
+    updateCartBadge();
+    showToast('✓ ' + item.name + ' added to cart!');
+    updateShippingBanner();
+  });
+
+  Snipcart.events.on('item.removed', function() {
+    updateCartBadge();
+    updateShippingBanner();
+  });
+
+  Snipcart.events.on('cart.opened', function() {
+    updateShippingBanner();
+  });
+});
+
+function updateShippingBanner() {
+  if (!window.Snipcart) return;
+  try {
+    const total = Snipcart.store.getState().cart.total || 0;
+    const threshold = 75;
+    const remaining = threshold - total;
+    const banner = document.getElementById('shipping-progress-banner');
+    if (!banner) return;
+    if (remaining <= 0) {
+      banner.innerHTML = '🚚 <strong>You qualify for free shipping!</strong>';
+      banner.style.background = 'rgba(74,222,128,0.12)';
+      banner.style.borderColor = 'rgba(74,222,128,0.3)';
+      banner.style.color = '#4ade80';
+    } else {
+      banner.innerHTML = '🚚 Add <strong>$' + remaining.toFixed(2) + ' more</strong> for free shipping';
+      banner.style.background = 'rgba(245,197,24,0.08)';
+      banner.style.borderColor = 'rgba(245,197,24,0.2)';
+      banner.style.color = 'var(--gold)';
+    }
+  } catch(e) {}
+}
+
+function updateCartBadge() {
+  const badge = document.getElementById('cart-badge');
+  if (badge && window.Snipcart) {
+    const count = Snipcart.store.getState().cart.items.count;
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+  }
+}
+
 function enquire(name) {
-  showToast('📩 Enquiry sent for ' + name);
+  showToast('📩 Enquiry sent for ' + name + ' — we\'ll be in touch!');
 }
 
 function showToast(msg) {
@@ -781,6 +924,24 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
+</script>
+<!-- Snipcart init -->
+<div hidden id="snipcart"
+  data-api-key="MTU2NTU1YjctNDNmMy00ZjZkLWE2ZjEtNGVjZjUwM2UxMWYyNjM5MTI2MDY1NTg2MTE1NDc4"
+  data-currency="usd"
+  data-config-modal-style="side"
+  data-config-add-product-behavior="none"
+></div>
+<!-- Stripe publishable key for payment processing: pk_test_51TPcfkHwy2JuoC26qJijwA0NCeotjNQNFTmgwvpBHdGVq8dbano0GUiOVvT0u1cCDvQUN1IRK2g7eSljFfNMRGRv00zPslVy15 -->
+<script async src="https://cdn.snipcart.com/themes/v3.3.3/default/snipcart.js"></script>
+
+<script>
+// Override cart open to use Snipcart
+document.addEventListener('DOMContentLoaded', function() {
+  // Style Snipcart to match brand
+  document.documentElement.style.setProperty('--color-default', '#F5C518');
+  document.documentElement.style.setProperty('--color-alt', '#0A0A0A');
+});
 </script>
 </body>
 </html>
